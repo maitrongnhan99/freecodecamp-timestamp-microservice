@@ -16,7 +16,7 @@ app.use(express.static('public'));
 
 // http://expressjs.com/en/starter/basic-routing.html
 app.get("/", function (req, res) {
-  res.sendFile(__dirname + '/views/index.html');
+  res.sendFile(__dirname + 'index.html');
 });
 
 
@@ -32,19 +32,37 @@ app.get("/api", (req, res) => {
   })
 })
 
-app.get("/api/:timestamp", (req, res) => {
-  const timestamp = req.params.timestamp
+app.get("/api/:date?", (req, res) => {
+  const timestamp = req.params.date
 
-  console.log({ timestamp })
+  const isInValidDate = !Boolean(new Date(timestamp))
+  const isTimestamp= !!Number(timestamp)
 
   const covertToUTC = new Date(timestamp).toUTCString()
+  const covetTimestampToUTC = new Date(Number(timestamp)).toUTCString();
 
-  if(!covertToUTC) return res.json({ error : "Invalid Date" })
+  if(isTimestamp && !!covetTimestampToUTC) {
+    console.log("Case time valid")
+   return res.json({
+      "unix": Number(timestamp),
+      "utc": covetTimestampToUTC
+    })
+  }
 
-  res.json({
-    "unix": new Date(timestamp).getTime(),
-    "utc": covertToUTC
-  })
+  console.log(!isInValidDate,!isTimestamp,!!covertToUTC,!covetTimestampToUTC)
+
+  if(!isInValidDate && !isTimestamp && !!covertToUTC && Number(new Date(timestamp).getTime())) {
+    console.log("Case timestamp")
+    return res.json({
+      "unix": Number(new Date(timestamp).getTime()),
+      "utc": covertToUTC
+    })
+  }
+
+
+    return res.json({ error : "Invalid Date" })
+
+
 })
 
 
